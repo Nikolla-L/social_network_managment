@@ -34,20 +34,31 @@ const router: Router = Router();
  *           RegisterUser:
  *              type: object,
  *              required:
- *                  - name
+ *                  - username
  *                  - email
  *                  - password  
+ *                  - genderId
+ *                  - birthDate
  *              properties:
- *                  name:
+ *                  username:
  *                      type: string
  *                  email:
  *                      type: string
  *                  password:
  *                      type: string
+ *                  genderId:
+ *                      type: number
+ *                  photo:
+ *                      type: string
+ *                  birthDate:
+ *                      type: date
  *              example:
- *                  name: Nick
+ *                  username: Nick
  *                  email: example@mail.com
  *                  password: something123
+ *                  genderId: 1
+ *                  photo: null
+ *                  birthDate: 2022-03-05T09:35:45.963+00:00
 *//**
 * @swagger
 * components:
@@ -59,17 +70,26 @@ const router: Router = Router();
 *              properties:
 *                  _id:
 *                      type: string
-*                  name:
+*                  username:
 *                      type: string
 *                  email:
 *                      type: string
 *                  password:
 *                      type: string
+*                  genderId:
+*                      type: number
+*                  photo:
+*                      type: string
+*                  birthDate:
+*                      type: date
 *              example:
 *                  _id: 1
-*                  name: Nick
+*                  username: Nick
 *                  email: example@mail.com
 *                  password: something123
+*                  genderId: 2
+*                  photo: hwiufhwie7fgwe78rtyfy38f73874rfg9f
+*                  birthDate: 2022-03-05T09:35:45.963+00:00
 */
  /**
   * @swagger
@@ -113,6 +133,7 @@ router.post('/login', login);
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/RegisterUser'
+ *       description: "Gender Ids: male - 1, female - 2, other - 3"
  *     responses:
  *       201:
  *          description: success
@@ -134,6 +155,7 @@ router.post('/register', register);
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/EditUser'
+ *       description: "Gender Ids: male - 1, female - 2, other - 3"
  *     security: 
  *     - jwt: []
  *     responses:
@@ -177,6 +199,8 @@ router.get('/users', getAllUsers);
  *     security: 
  *     - jwt: []
  *     responses:
+ *       200:
+ *          description: success
  *       204:
  *          description: success
  *       400:

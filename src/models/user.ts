@@ -4,17 +4,35 @@ import { UserDocument } from '../types/user';
 
 const userSchema = new Schema(
     {
-        name: {
+        username: {
             type: String,
             required: true
         },
         email: {
             type: String,
-            required: true
+            required: true,
+            unique: true
         },
         password: {
             type: String,
             required: true
+        },
+        genderId: {
+            type: Number,
+            reuqired: true
+        },
+        photo: {
+            type: String,
+            required: false
+        },
+        birthDate: {
+            type: Date,
+            required: true
+        },
+        isAdmin: {
+            type: Boolean,
+            required: true,
+            default: false
         }
     },
     {

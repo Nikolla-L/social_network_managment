@@ -1,9 +1,13 @@
 import { Model, Document } from "mongoose";
 
 export interface User {
-    name: string;
+    username: string;
     email: string;
     password: string;
+    genderId: number;
+    photo: string;
+    birthDate: Date;
+    isAdmin?: boolean;
 }
 
 export interface UserDocument extends User, Document {
