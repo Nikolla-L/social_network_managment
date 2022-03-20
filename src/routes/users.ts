@@ -4,6 +4,7 @@ import {
   register,
   editUser,
   getAllUsers,
+  getOneUser,
   deleteUser
 } from '../controllers/users';
 import { checkAuth } from '../middleware/auth';
@@ -102,7 +103,7 @@ const router: Router = Router();
  * @swagger
  * /api/login:
  *   post:
- *     summary: ავტორიზაცია
+ *     summary: Authorization
  *     tags: [User]
  *     requestBody:
  *       required: true
@@ -125,7 +126,7 @@ router.post('/login', login);
  * @swagger
  * /api/register:
  *   post:
- *     summary: რეგისტრაცია
+ *     summary: Registration
  *     tags: [User]
  *     requestBody:
  *       required: true
@@ -147,7 +148,7 @@ router.post('/register', register);
  * @swagger
  * /api/edit:
  *   put:
- *     summary: იუზერის ედიტირება
+ *     summary: Edit user
  *     tags: [User]
  *     requestBody:
  *       required: true
@@ -173,7 +174,7 @@ router.put('/edit', checkAuth, editUser);
  * @swagger
  * /api/users:
  *   get:
- *     summary: არსებული იუზერების სიის მიღება
+ *     summary: Get all users list
  *     tags: [User]
  *     responses:
  *       200:
@@ -186,8 +187,35 @@ router.get('/users', getAllUsers);
 /**
  * @swagger
  * /api/users/{id}:
+ *   get:
+ *     summary: Get the user with UserId
+ *     tags: [User]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *           required: true
+ *         description: user id
+ *     responses:
+ *       200:
+ *          description: Success
+ *       400:
+ *          description: Bad request
+ *       401:
+ *          description: Unauthorized
+ *       404:
+ *          description: Not Found
+ *       500:
+ *         description: Internal server error
+*/
+router.get('/users/:id', getOneUser);
+
+/**
+ * @swagger
+ * /api/users/{id}:
  *   delete:
- *     summary: იუზერის წაშლა
+ *     summary: Delete user
  *     tags: [User]
  *     parameters:
  *       - in: path
@@ -200,13 +228,13 @@ router.get('/users', getAllUsers);
  *     - jwt: []
  *     responses:
  *       200:
- *          description: success
+ *          description: Success
  *       204:
- *          description: success
+ *          description: Success
  *       400:
- *          description: bad request
+ *          description: Bad request
  *       401:
- *          description: unauthorized
+ *          description: Unauthorized
  *       500:
  *         description: Internal server error
 */

@@ -116,6 +116,28 @@ export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
     }
 });
 
+export const getOneUser = asyncHandler(async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+
+        if(!id) {
+            res.status(400).send('Bad reuqest');
+            return;
+        }
+
+        const user = await User.findById(id);
+        if(!user) {
+            res.status(404).send('User not found');
+            return;
+        } else {
+            res.status(200).json(user);
+        }
+    } catch (error) {
+        res.status(400).send('Bad request');
+        return;
+    }
+});
+
 export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
     try {
         const user = await User.findById(req.params.id);

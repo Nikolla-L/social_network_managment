@@ -33,7 +33,7 @@ router.get('/example-auth', checkAuth, (req: Request, res: Response) => {
  * @swagger
  * /api/example-auth-and-isAdmin:
  *   get:
- *     summary: test api for auth middleware
+ *     summary: test api for admin auth middleware
  *     tags: [Test]
  *     security: 
  *     - jwt: []
