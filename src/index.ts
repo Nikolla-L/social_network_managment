@@ -13,16 +13,17 @@ const app: Express = express();
 const PORT = process.env.PORT || 3001;
 const specs = swaggerJSDoc(swaggerOptions);
 
+app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(morgan('dev'));
 app.use(cors());
 
 app.get('/', (req: Request, res: Response) => {
-    res.send('Server is running...')
+    res.render('index')
 });
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
-app.use('/api', testRoutes);
 app.use('/api', userRoutes);
+app.use('/api', testRoutes);
 
 connectDB('mongodb+srv://nikolla:12341234@nikoloza.84pn3.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')
 .then(() => {

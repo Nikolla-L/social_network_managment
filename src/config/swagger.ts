@@ -2,7 +2,7 @@ export const swaggerOptions = {
     definition: {
         openapi: "3.0.0",
         info: {
-            title: "Project APIs",
+            title: "Social Network Managment System APIs",
             version: "1.0.0",
             description: "Express Library API"
         },

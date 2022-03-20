@@ -1,12 +1,13 @@
 import jwt from 'jsonwebtoken';
-import { NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import asyncHandler from 'express-async-handler';
 
-export const checkAuth = asyncHandler(async (req: any, res: any, next: NextFunction) => {
+export const checkAuth = asyncHandler(async (req: any, res: Response, next: NextFunction) => {
     let headerToken = req.headers.authorization?.split(" ")[1];
 
     if (!headerToken || !req.headers.authorization) {
-        return res.status(401).send('You are not authorized!');
+        res.status(401).send('You are not authorized!');
+        return;
     }
 
     const verify = async () => {
