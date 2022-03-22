@@ -146,10 +146,9 @@ export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
             user.remove();
             res.status(200).send('Successfuly deleted!');
             return;
-        } else {
-            res.status(400).send('Bad request');
-            return;
         }
+        res.status(200).send('Successfuly deleted!');
+        return;
     } catch (error) {
         res.status(400).send('Bad request');
         return;
