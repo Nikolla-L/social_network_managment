@@ -122,6 +122,7 @@ const router: Router = Router();
  *         description: Internal server error
 */
 router.post('/login', login);
+
 /**
  * @swagger
  * /api/register:
@@ -144,6 +145,7 @@ router.post('/login', login);
  *         description: Internal server error
 */
 router.post('/register', register);
+
 /**
  * @swagger
  * /api/edit:
@@ -170,6 +172,7 @@ router.post('/register', register);
  *         description: Internal server error
 */
 router.put('/edit', checkAuth, editUser);
+
 /**
  * @swagger
  * /api/users:
