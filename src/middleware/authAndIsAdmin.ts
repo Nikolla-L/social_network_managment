@@ -29,5 +29,5 @@ export const checkAuthAndAdmin = asyncHandler(async(req: any, res: Response, nex
 
     await verify()
         .then(() => next())
-        .catch(error =>  console.log(error))
+        .catch(error => res.status(401).send('authorization failed'))
 })

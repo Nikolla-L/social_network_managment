@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { User } from '../models/user';
 import { generateToken } from '../utils/generateToken';
-import { validateGenderId } from '../utils/userSettings';
 import asyncHandler from 'express-async-handler';
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
@@ -27,47 +26,54 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
-    const {username, email, password, genderId, photo, birthDate} = req.body as {
-        username: string;
-        email: string;
-        password: string;
-        genderId: number;
-        photo: string;
-        birthDate: Date;
-    };
-
-    const userExists = await User.findOne({ email });
-    if(userExists) {
-        res.status(400).send('User already exists with this email');
-        return;
-    }
-
-    if(!validateGenderId(genderId)) {
-        res.status(400).send('Bad request: invalid gender Id')
-        return;
-    }
-
-    const user = await User.create({
-        username, email, password, genderId, photo, birthDate
-    });
-
-    if(user) {
-        res.status(201).json({
-            _id: user._id,
-            username: user.username,
-            email: user.email,
-            photo: user.photo,
-            genderId: user.genderId,
-            birthDate: user.birthDate,
-            token: generateToken(user._id, 'secret')
-        })
-    } else {
-        res.status(400).send('Bad request');
+    try {
+        const {username, email, password, genderId, photo, birthDate} = req.body as {
+            username: string;
+            email: string;
+            password: string;
+            genderId: number;
+            photo: string;
+            birthDate: Date;
+        };
+    
+        const userExists = await User.findOne({ email });
+        if(userExists) {
+            res.status(400).send('User already exists with this email');
+            return;
+        }
+    
+        if(![1, 2, 3].includes(Number(genderId))) {
+            res.status(400).send('Bad request: invalid gender Id')
+            return;
+        }
+    
+        const user = await User.create({
+            username, email, password, genderId, photo, birthDate
+        });
+    
+        if(user) {
+            res.status(201).json({
+                message: 'success',
+                user: {
+                    _id: user._id,
+                    username: user.username,
+                    email: user.email,
+                    photo: user.photo,
+                    genderId: user.genderId,
+                    birthDate: user.birthDate,
+                    token: generateToken(user._id, 'secret')
+                }
+            })
+        } else {
+            res.status(400).send('Bad request');
+        }
+    } catch (err) {
+        res.status(400).send(err);
     }
 });
 
 export const editUser = asyncHandler(async (req: any, res: Response) => {
-    const user = await User.findOne({email: req.body.email});
+    const user = await User.findById(req.query.userId);
 
     if(user) {
         user.username = req.body.username || user.username;
@@ -86,7 +92,7 @@ export const editUser = asyncHandler(async (req: any, res: Response) => {
             return;
         }
 
-        if(!validateGenderId(req.body.genderId) && req.body.genderId) {
+        if(req.body.genderId && ![1, 2, 3].includes(Number(req.body.genderId))) {
             res.status(400).send('Bad request: invalid gender Id')
             return;
         }
@@ -140,15 +146,16 @@ export const getOneUser = asyncHandler(async (req: Request, res: Response) => {
 
 export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
     try {
-        const user = await User.findById(req.params.id);
+        const user = await User.findById(req.query.id);
 
         if(user) {
             user.remove();
             res.status(200).send('Successfuly deleted!');
             return;
+        } else {
+            res.status(404).send('user not found!');
+            return;
         }
-        res.status(200).send('Successfuly deleted!');
-        return;
     } catch (error) {
         res.status(400).send('Bad request');
         return;

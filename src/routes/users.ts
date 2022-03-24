@@ -8,6 +8,7 @@ import {
   deleteUser
 } from '../controllers/users';
 import { checkAuth } from '../middleware/auth';
+import { checkAuthAndUserSelfOrAdmin } from '../middleware/authAndIsAdminOrSelfUser';
 
 const router: Router = Router();
 
@@ -96,7 +97,13 @@ const router: Router = Router();
   * @swagger
   * tags:
   *   name: User
-  *   description: Users authorization and registration API (+ edit user)
+  *   description: Get, edit and delete users
+*/
+ /**
+  * @swagger
+  * tags:
+  *   name: Auth
+  *   description: Authorization and registration
 */
 
 /**
@@ -104,7 +111,7 @@ const router: Router = Router();
  * /api/login:
  *   post:
  *     summary: Authorization
- *     tags: [User]
+ *     tags: [Auth]
  *     requestBody:
  *       required: true
  *       content:
@@ -128,7 +135,7 @@ router.post('/login', login);
  * /api/register:
  *   post:
  *     summary: Registration
- *     tags: [User]
+ *     tags: [Auth]
  *     requestBody:
  *       required: true
  *       content:
@@ -146,12 +153,26 @@ router.post('/login', login);
 */
 router.post('/register', register);
 
+// TODO
 /**
  * @swagger
- * /api/edit:
+ * /api/users:
  *   put:
  *     summary: Edit user
  *     tags: [User]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *           required: true
+ *         description: currently authorized users id
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: string
+ *           required: true
+ *         description: to edit users id
  *     requestBody:
  *       required: true
  *       content:
@@ -168,10 +189,12 @@ router.post('/register', register);
  *         description: Bad request
  *       401:
  *         description: Unauthorized
+ *       404:
+ *         description: Not found
  *       500:
  *         description: Internal server error
 */
-router.put('/edit', checkAuth, editUser);
+router.put('/users', checkAuthAndUserSelfOrAdmin, editUser);
 
 /**
  * @swagger
@@ -216,17 +239,17 @@ router.get('/users/:id', getOneUser);
 
 /**
  * @swagger
- * /api/users/{id}:
+ * /api/users:
  *   delete:
  *     summary: Delete user
  *     tags: [User]
  *     parameters:
- *       - in: path
+ *       - in: query
  *         name: id
  *         schema:
  *           type: string
  *           required: true
- *         description: user id
+ *         description: user id to delete
  *     security: 
  *     - jwt: []
  *     responses:
@@ -238,9 +261,11 @@ router.get('/users/:id', getOneUser);
  *          description: Bad request
  *       401:
  *          description: Unauthorized
+ *       404:
+ *          description: Not found
  *       500:
  *         description: Internal server error
 */
-router.delete('/users/:id', checkAuth, deleteUser);
+router.delete('/users', checkAuthAndUserSelfOrAdmin, deleteUser);
 
 export default router;

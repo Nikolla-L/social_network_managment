@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user';
 import asyncHandler from 'express-async-handler';
@@ -6,6 +6,7 @@ import asyncHandler from 'express-async-handler';
 // middleware function to authenicate and check if the user is admin or himself for individual profile actions
 export const checkAuthAndUserSelfOrAdmin = asyncHandler(async(req: any, res: Response, next: NextFunction) => {
     let headerToken = req.headers.authorization?.split(" ")[1];
+    let myId = req.query.id;
 
     if (!headerToken || !req.headers.authorization) {
         res.status(401).send('You are not authorized!');
@@ -17,7 +18,7 @@ export const checkAuthAndUserSelfOrAdmin = asyncHandler(async(req: any, res: Res
         const id = payload?.id;
         if(id) {
             const user: any = await User.findById(id);
-            if(!user?.isAdmin) {
+            if(!user?.isAdmin && id != myId) {
                 res.status(403).send('Forbidden content');
                 return;
             }
@@ -29,5 +30,5 @@ export const checkAuthAndUserSelfOrAdmin = asyncHandler(async(req: any, res: Res
 
     await verify()
         .then(() => next())
-        .catch(error =>  console.log(error))
+        .catch(error => res.status(401).send('authorization failed'))
 })
