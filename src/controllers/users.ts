@@ -67,48 +67,51 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
         } else {
             res.status(400).send('Bad request');
         }
-    } catch (err) {
-        res.status(400).send(err);
+    } catch (error) {
+        res.status(400).send(error);
     }
 });
 
 export const editUser = asyncHandler(async (req: any, res: Response) => {
-    const user = await User.findById(req.query.userId);
+    try {
+        const user = await User.findById(req.query.userId);
 
-    if(user) {
-        user.username = req.body.username || user.username;
-        user.email = req.body.email || user.email;
-        user.birthDate = req.body.birthDate || user.birthDate;
-        user.genderId = req.body.gender || user.genderId;
-        user.photo = req.body.photo || user.photo;
+        if(user) {
+            user.username = req.body.username || user.username;
+            user.email = req.body.email || user.email;
+            user.birthDate = req.body.birthDate || user.birthDate;
+            user.genderId = req.body.genderId || user.genderId;
+            user.photo = req.body.photo || user.photo;
 
-        if(req.body.password) {
-            user.password = req.body.password;
+            if(req.body.password) {
+                user.password = req.body.password;
+            }
+
+            const userExists = await User.findOne({ email: req.body.email });
+            if(userExists && req.body.email !== userExists.email) {
+                res.status(400).send('User already exists with this email');
+                return;
+            }
+
+            if(req.body.genderId && ![1, 2, 3].includes(Number(req.body.genderId))) {
+                res.status(400).send('Bad request: invalid gender Id')
+                return;
+            }
+
+            const updatedUser = await user.save();
+            res.status(201).json({
+                _id: updatedUser._id,
+                username: updatedUser.username,
+                email: updatedUser.email,
+                gender: updatedUser.genderId,
+                photo: updatedUser.photo,
+                birthDate: updatedUser.birthDate,
+            });
+        } else {
+            res.status(404).send('User was not found');
         }
-
-        const userExists = await User.findOne({ email: req.body.email });
-        if(userExists && req.body.email !== userExists.email) {
-            res.status(400).send('User already exists with this email');
-            return;
-        }
-
-        if(req.body.genderId && ![1, 2, 3].includes(Number(req.body.genderId))) {
-            res.status(400).send('Bad request: invalid gender Id')
-            return;
-        }
-
-        const updatedUser = await user.save();
-        res.status(201).json({
-            _id: updatedUser._id,
-            username: updatedUser.username,
-            email: updatedUser.email,
-            gender: updatedUser.genderId,
-            photo: updatedUser.photo,
-            birthDate: updatedUser.birthDate,
-            token: generateToken(updatedUser._id, 'secret')
-        });
-    } else {
-        res.status(404).send('User was not found');
+    } catch (error) {
+        res.status(400).send(error);
     }
 });
 

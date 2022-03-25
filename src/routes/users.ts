@@ -153,7 +153,6 @@ router.post('/login', login);
 */
 router.post('/register', register);
 
-// TODO
 /**
  * @swagger
  * /api/users:
