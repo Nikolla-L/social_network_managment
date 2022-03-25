@@ -2,13 +2,14 @@ import { Router } from 'express';
 import {
     addPost,
     getAllPosts,
+    getUserPosts,
     getOnePost,
     editPost,
     likePost,
+    unlikePost,
     deletePost
 } from '../controllers/posts';
 import { checkAuth } from '../middleware/auth';
-// import { checkAuthAndIsAdmin } from '../middleware/authAndIsAdmin';
 import { checkAuthAndUserSelfOrAdmin } from '../middleware/authAndIsAdminOrSelfUser';
 
 const router: Router = Router();
@@ -20,12 +21,9 @@ const router: Router = Router();
  *           AddPost:
  *              type: object,
  *              required:
- *                  - userId
  *                  - title
  *                  - description
  *              properties:
- *                  userId:
- *                      type: string
  *                  title:
  *                      type: string
  *                  description:
@@ -37,7 +35,6 @@ const router: Router = Router();
  *                  textColor:
  *                      type: string
  *              example:
- *                  userId: ssdsdfdfdgdg3434
  *                  title: titlexample
  *                  description: some desc text
  *                  photo: skskks.jpg
@@ -66,20 +63,6 @@ const router: Router = Router();
  *                  photo: skskks.jpg
  *                  backgroundColor: yellow
  *                  textColor: red
-*//**
-* @swagger
-* components:
-*      schemas:
-*           LikePost:
-*              type: object,
-*              properties:
-*                  userId:
-*                      type: string
-*                  postId:
-*                      type: string
-*              example:
- *                  userId: hgtryh4564hfgh
- *                  postId: rfgeetgthrhryh
 */
 /**
   * @swagger
@@ -122,6 +105,13 @@ router.post('/', checkAuth, addPost);
  *   get:
  *     summary: Get all posts
  *     tags: [Post]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *           required: true
+ *         description: filter by user id
  *     responses:
  *       200:
  *          description: success
@@ -132,12 +122,30 @@ router.get('/', checkAuth, getAllPosts);
 
 /**
  * @swagger
- * /api/posts/{id}:
+ * /api/posts/my-posts:
+ *   get:
+ *     summary: Get my (authorized user) posts
+ *     tags: [Post]
+ *     responses:
+ *       200:
+ *          description: success
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Not authorized
+ *       404:
+ *         description: Not found
+*/
+router.get('/my-posts', checkAuth, getUserPosts);
+
+/**
+ * @swagger
+ * /api/posts/one-post:
  *   get:
  *     summary: Get one post with postId
  *     tags: [Post]
  *     parameters:
- *       - in: path
+ *       - in: query
  *         name: id
  *         schema:
  *           type: string
@@ -155,14 +163,27 @@ router.get('/', checkAuth, getAllPosts);
  *       500:
  *         description: Internal server error
 */
-router.get('/:id', checkAuth, getOnePost);
+router.get('/one-post', checkAuth, getOnePost);
 
 /**
  * @swagger
- * /api/posts/{id}:
+ * /api/posts/edit:
  *   put:
  *     summary: Edit post
  *     tags: [Post]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *           required: true
+ *         description: user id
+ *       - in: query
+ *         name: postId
+ *         schema:
+ *           type: string
+ *           required: true
+ *         description: post id
  *     requestBody:
  *       required: true
  *       content:
@@ -183,7 +204,7 @@ router.get('/:id', checkAuth, getOnePost);
  *       500:
  *         description: Internal server error
 */
-router.put('/:id', checkAuthAndUserSelfOrAdmin, editPost);
+router.put('/edit', checkAuthAndUserSelfOrAdmin, editPost);
 
 /**
  * @swagger
@@ -191,12 +212,13 @@ router.put('/:id', checkAuthAndUserSelfOrAdmin, editPost);
  *   put:
  *     summary: Like post
  *     tags: [Post]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/LikePost'
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *           required: true
+ *         description: post id
  *     security: 
  *     - jwt: []
  *     responses:
@@ -210,16 +232,48 @@ router.put('/:id', checkAuthAndUserSelfOrAdmin, editPost);
  *         description: Internal server error
 */
 router.put('/like', checkAuth, likePost);
-
 /**
  * @swagger
- * /api/posts/{id}:
+ * /api/posts/like:
  *   delete:
- *     summary: Delete post
+ *     summary: Unlike post
  *     tags: [Post]
  *     parameters:
  *       - in: path
  *         name: id
+ *         schema:
+ *           type: string
+ *           required: true
+ *         description: post id
+ *     security: 
+ *     - jwt: []
+ *     responses:
+ *       201:
+ *          description: success
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+*/
+router.delete('/like', checkAuth, unlikePost);
+
+/**
+ * @swagger
+ * /api/posts:
+ *   delete:
+ *     summary: Delete post
+ *     tags: [Post]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *           required: true
+ *         description: user id
+ *       - in: query
+ *         name: postId
  *         schema:
  *           type: string
  *           required: true
@@ -235,9 +289,11 @@ router.put('/like', checkAuth, likePost);
  *          description: Bad request
  *       401:
  *          description: Unauthorized
+ *       403:
+ *          description: Forbidden
  *       500:
  *         description: Internal server error
 */
-router.delete('/:id', checkAuthAndUserSelfOrAdmin, deletePost);
+router.delete('/', checkAuthAndUserSelfOrAdmin, deletePost);
 
 export default router;

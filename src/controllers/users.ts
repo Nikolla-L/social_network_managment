@@ -75,7 +75,6 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 export const editUser = asyncHandler(async (req: any, res: Response) => {
     try {
         const user = await User.findById(req.query.userId);
-
         if(user) {
             user.username = req.body.username || user.username;
             user.email = req.body.email || user.email;
@@ -117,7 +116,6 @@ export const editUser = asyncHandler(async (req: any, res: Response) => {
 
 export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
     const users = await User.find();
-
     if(users) {
         res.status(200).json(users);
     } else {
@@ -130,7 +128,7 @@ export const getOneUser = asyncHandler(async (req: Request, res: Response) => {
         const { id } = req.params;
 
         if(!id) {
-            res.status(400).send('Bad reuqest');
+            res.status(400).send('Bad reuqest: id required');
             return;
         }
 
