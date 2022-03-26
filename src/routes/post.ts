@@ -110,8 +110,9 @@ router.post('/', checkAuth, addPost);
  *         name: id
  *         schema:
  *           type: string
- *           required: true
  *         description: filter by user id
+ *     security:
+ *     - jwt: []
  *     responses:
  *       200:
  *          description: success
@@ -126,6 +127,8 @@ router.get('/', checkAuth, getAllPosts);
  *   get:
  *     summary: Get my (authorized user) posts
  *     tags: [Post]
+ *     security: 
+ *     - jwt: []
  *     responses:
  *       200:
  *          description: success
@@ -151,6 +154,8 @@ router.get('/my-posts', checkAuth, getUserPosts);
  *           type: string
  *           required: true
  *         description: post id
+ *     security:
+ *     - jwt: []
  *     responses:
  *       200:
  *          description: Success

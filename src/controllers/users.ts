@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { User } from '../models/user';
 import { generateToken } from '../utils/generateToken';
 import asyncHandler from 'express-async-handler';
+import { sendRegistrationWelcome, sendDeleteAccountSuccess } from '../utils/mailer';
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
     const {email, password} = req.body as {email: string, password: string};
@@ -52,6 +53,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
         });
     
         if(user) {
+            sendRegistrationWelcome(email);
             res.status(201).json({
                 message: 'success',
                 user: {
@@ -150,6 +152,7 @@ export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
         const user = await User.findById(req.query.id);
 
         if(user) {
+            sendDeleteAccountSuccess(user?.email);
             user.remove();
             res.status(200).send('Successfuly deleted!');
             return;
