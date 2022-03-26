@@ -5,9 +5,11 @@ import {
   editUser,
   getAllUsers,
   getOneUser,
-  deleteUser
+  deleteUser,
+  sendResetWithPhoneRequest,
+  sendResetWithEmailRequest,
+  resetPassword
 } from '../controllers/users';
-import { checkAuth } from '../middleware/auth';
 import { checkAuthAndUserSelfOrAdmin } from '../middleware/authAndIsAdminOrSelfUser';
 
 const router: Router = Router();
@@ -46,6 +48,8 @@ const router: Router = Router();
  *                      type: string
  *                  email:
  *                      type: string
+ *                  phone:
+ *                      type: string
  *                  password:
  *                      type: string
  *                  genderId:
@@ -57,10 +61,63 @@ const router: Router = Router();
  *              example:
  *                  username: Nick
  *                  email: example@mail.com
+ *                  phone: 599585858
  *                  password: something123
  *                  genderId: 1
  *                  photo: null
  *                  birthDate: 2022-03-05T09:35:45.963+00:00
+*//**
+* @swagger
+* components:
+*      schemas:
+*           PhoneResetRequest:
+*              type: object,
+*              required:
+*                  - phone
+*              properties:
+*                  phone:
+*                      type: string
+*              example:
+*                  phone: 599555555
+*//**
+* @swagger
+* components:
+*      schemas:
+*           EmailResetRequest:
+*              type: object,
+*              required:
+*                  - email
+*              properties:
+*                  email:
+*                      type: string
+*              example:
+*                  email: example@mail.com
+*//**
+* @swagger
+* components:
+*      schemas:
+*           ResetPassword:
+*              type: object
+*              required:
+*                  - password
+*                  - confirmPassword
+*              properties:
+*                  email:
+*                      type: string
+*                  phone:
+*                      type: string
+*                  code:
+*                      type: string
+*                  password:
+*                      type: string
+*                  confirmPassword:
+*                      type: string
+*              example:
+*                  email: example@mail.com
+*                  phone: 599252525
+*                  code: 000000
+*                  password: newpwd123
+*                  confirmPassword: newpwd123
 *//**
 * @swagger
 * components:
@@ -76,6 +133,8 @@ const router: Router = Router();
 *                      type: string
 *                  email:
 *                      type: string
+*                  phone:
+*                      type: string
 *                  password:
 *                      type: string
 *                  genderId:
@@ -88,6 +147,7 @@ const router: Router = Router();
 *                  _id: 1
 *                  username: Nick
 *                  email: example@mail.com
+*                  phone: 599585858
 *                  password: something123
 *                  genderId: 2
 *                  photo: hwiufhwie7fgwe78rtyfy38f73874rfg9f
@@ -152,6 +212,80 @@ router.post('/login', login);
  *         description: Internal server error
 */
 router.post('/register', register);
+
+/**
+ * @swagger
+ * /api/email-reset-password:
+ *   post:
+ *     summary: send reset code request to email
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/EmailResetRequest'
+ *     responses:
+ *       201:
+ *          description: success
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+*/
+router.post('/email-reset-password', sendResetWithEmailRequest);
+
+/**
+ * @swagger
+ * /api/phone-reset-password:
+ *   post:
+ *     summary: send reset code request to phone
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/PhoneResetRequest'
+ *     responses:
+ *       201:
+ *          description: success
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+*/
+router.post('/phone-reset-password', sendResetWithPhoneRequest);
+
+/**
+ * @swagger
+ * /api/reset-password:
+ *   put:
+ *     summary: Reset password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ResetPassword'
+ *     responses:
+ *       201:
+ *          description: success
+ *       203:
+ *          description: continue process
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+*/
+router.put('/reset-password', resetPassword);
 
 /**
  * @swagger

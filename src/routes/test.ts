@@ -10,7 +10,9 @@ const router: Router = Router();
   * tags:
   *   name: Test
   *   description: Test apis for development process
-*//** 
+*/
+
+/** 
  * @swagger
  * components:
  *      schemas:
@@ -26,9 +28,10 @@ const router: Router = Router();
  *                  number: 555555555
  *                  text: something
 */
+
 /**
  * @swagger
- * /api/example-auth:
+ * /api/test/example-auth:
  *   get:
  *     summary: test api for auth middleware
  *     tags: [Test]
@@ -45,9 +48,10 @@ const router: Router = Router();
 router.get('/example-auth', checkAuth, (req: Request, res: Response) => {
     res.send('Authorization is done. It means middleware works perfectly')
 });
+
 /**
  * @swagger
- * /api/example-auth-and-isAdmin:
+ * /api/test/example-auth-and-isAdmin:
  *   get:
  *     summary: test api for admin auth middleware
  *     tags: [Test]
@@ -73,7 +77,7 @@ router.get('/example-auth-and-isAdmin', checkAuthAndAdmin, (req: Request, res: R
 
 /**
  * @swagger
- * /api/send-sms:
+ * /api/test/send-sms:
  *   post:
  *     summary: send example sms to phone number, protected with admin middleware
  *     tags: [Test]

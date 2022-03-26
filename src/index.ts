@@ -25,7 +25,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/api', userRoutes);
 app.use('/api/posts/', postRoutes);
-app.use('/api', testRoutes);
+app.use('/api/test', testRoutes);
 
 connectDB('mongodb+srv://nikolla:12341234@nikoloza.84pn3.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')
 .then(() => {

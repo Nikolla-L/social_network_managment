@@ -13,6 +13,11 @@ const userSchema = new Schema(
             required: true,
             unique: true
         },
+        phone: {
+            type: String,
+            required: false,
+            unique: true
+        },
         password: {
             type: String,
             required: true
@@ -33,6 +38,10 @@ const userSchema = new Schema(
             type: Boolean,
             required: true,
             default: false
+        },
+        resetCode: {
+            type: String,
+            required: false
         }
     },
     {

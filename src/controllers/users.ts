@@ -1,8 +1,14 @@
 import { Request, Response } from 'express';
 import { User } from '../models/user';
-import { generateToken } from '../utils/generateToken';
 import asyncHandler from 'express-async-handler';
-import { sendRegistrationWelcome, sendDeleteAccountSuccess } from '../utils/mailer';
+import {
+    sendRegistrationWelcome,
+    sendDeleteAccountSuccess,
+    sendCodeToEmail
+} from '../utils/mailer';
+import { sendCodeToPhone } from '../utils/smsSender';
+import { generateToken } from '../utils/generateToken';
+import { generateString } from '../utils/services';
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
     const {email, password} = req.body as {email: string, password: string};
@@ -28,9 +34,10 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
     try {
-        const {username, email, password, genderId, photo, birthDate} = req.body as {
+        const {username, email, phone, password, genderId, photo, birthDate} = req.body as {
             username: string;
             email: string;
+            phone: string;
             password: string;
             genderId: number;
             photo: string;
@@ -42,6 +49,12 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
             res.status(400).send('User already exists with this email');
             return;
         }
+
+        const phoneUsed = await User.findOne({ phone });
+        if(phoneUsed) {
+            res.status(400).send('Phone number is in use');
+            return;
+        }
     
         if(![1, 2, 3].includes(Number(genderId))) {
             res.status(400).send('Bad request: invalid gender Id')
@@ -49,7 +62,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
         }
     
         const user = await User.create({
-            username, email, password, genderId, photo, birthDate
+            username, email, phone, password, genderId, photo, birthDate
         });
     
         if(user) {
@@ -60,6 +73,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
                     _id: user._id,
                     username: user.username,
                     email: user.email,
+                    phone: user.phone,
                     photo: user.photo,
                     genderId: user.genderId,
                     birthDate: user.birthDate,
@@ -74,12 +88,101 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     }
 });
 
+export const sendResetWithEmailRequest = asyncHandler(async (req: Request, res: Response) => {
+    try {
+        const code = generateString();
+        const email = req.body.email;
+        const user = await User.findOne({email});
+        if(user) {
+            await sendCodeToEmail(email, code);
+            user.resetCode = code;
+            const updated = await user.save();
+            res.status(201).send('success');
+        } else {
+            res.status(404).send('User not found with this email');
+        }
+    } catch (error) {
+        res.status(400).send(error);
+    }
+})
+
+export const sendResetWithPhoneRequest = asyncHandler(async (req: Request, res: Response) => {
+    try {
+        const code = generateString();
+        const phone = req.body.phone;
+        const user = await User.findOne({phone});
+        if(user) {
+            await sendCodeToPhone(phone, code);
+            user.resetCode = code;
+            const updated = await user.save();
+            res.status(201).send('success');
+        } else {
+            res.status(404).send('User not found with this phone number');
+        }
+    } catch (error) {
+        res.status(400).send(error);
+    } 
+})
+
+export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
+    try {
+        const { email, phone, code, password, confirmPassword } = req.body;
+        let user: any;
+        if(email) {
+            user = await User.findOne({email});
+        } else if(phone) {
+            user = await User.findOne({phone});
+        } else {
+            res.status(400).send('email or phone number is needed');
+            return;
+        }
+
+        if(!user) {
+            res.status(404).send('User not found');
+            return;
+        }
+
+        if(!code) {
+            res.status(400).send('Bad request: code is required');
+        }
+            
+        if(code == user.resetCode) {
+            if(!password) {
+                res.status(203).send('continue');
+                return;
+            }
+            if(password == confirmPassword) {
+                user.resetCode = null;
+                user.password = password;
+                const updatedUser = await user.save();
+                res.status(201).json({
+                    message: 'success',
+                    user: {
+                         _id: updatedUser._id,
+                        username: updatedUser.username,
+                        email: updatedUser.email,
+                        phone: updatedUser.phone,
+                        photo: updatedUser.photo
+                    }
+                });
+            } else {
+                res.status(400).send('Password and confirm password must match');
+            }
+        } else {
+            res.status(400).send('Bad request: invalid code');
+        }
+    } catch (error) {
+        res.status(400).send(error);
+    }
+})
+
 export const editUser = asyncHandler(async (req: any, res: Response) => {
     try {
         const user = await User.findById(req.query.userId);
         if(user) {
             user.username = req.body.username || user.username;
             user.email = req.body.email || user.email;
+            user.phone = req.body.phone || user.phone;
             user.birthDate = req.body.birthDate || user.birthDate;
             user.genderId = req.body.genderId || user.genderId;
             user.photo = req.body.photo || user.photo;
@@ -94,6 +197,14 @@ export const editUser = asyncHandler(async (req: any, res: Response) => {
                 return;
             }
 
+            if(req.body.phone) {
+                const phoneUsed = await User.findOne({ phone: req.body.phone});
+                if(phoneUsed && req.body.phone != phoneUsed.phone) {
+                    res.status(400).send('This phone number is in use');
+                    return;
+                }
+            }
+
             if(req.body.genderId && ![1, 2, 3].includes(Number(req.body.genderId))) {
                 res.status(400).send('Bad request: invalid gender Id')
                 return;
@@ -104,6 +215,7 @@ export const editUser = asyncHandler(async (req: any, res: Response) => {
                 _id: updatedUser._id,
                 username: updatedUser.username,
                 email: updatedUser.email,
+                phone: updatedUser.phone,
                 gender: updatedUser.genderId,
                 photo: updatedUser.photo,
                 birthDate: updatedUser.birthDate,
