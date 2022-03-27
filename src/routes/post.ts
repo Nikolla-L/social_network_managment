@@ -86,7 +86,7 @@ const router: Router = Router();
  *     security: 
  *     - jwt: []
  *     responses:
- *       200:
+ *       201:
  *          description: success
  *       400:
  *         description: Bad request

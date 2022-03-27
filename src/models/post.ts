@@ -38,6 +38,6 @@ const postSchema = new Schema(
     {
         timestamps: true
     }
-)
+);
 
 export const Post = model<PostDocument>('Post', postSchema);

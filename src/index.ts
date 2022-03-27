@@ -5,6 +5,7 @@ import connectDB from './config/db';
 import { seedUser } from './seeder/user';
 import userRoutes from './routes/users';
 import postRoutes from './routes/post';
+import commentRoutes from './routes/comment';
 import testRoutes from './routes/test';
 import swaggerUi from "swagger-ui-express";
 import swaggerJSDoc from 'swagger-jsdoc';
@@ -25,6 +26,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/api', userRoutes);
 app.use('/api/posts/', postRoutes);
+app.use('/api/comments/', commentRoutes);
 app.use('/api/test', testRoutes);
 
 connectDB('mongodb+srv://nikolla:12341234@nikoloza.84pn3.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')

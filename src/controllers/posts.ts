@@ -162,7 +162,7 @@ export const unlikePost =  asyncHandler(async (req: Request, res: Response) => {
 
 export const deletePost = asyncHandler(async (req: Request, res: Response) => {
     try {
-        const post = await Post.findById(req.params.id);
+        const post = await Post.findById(req.query.postId);
 
         if(post) {
             post.remove();
