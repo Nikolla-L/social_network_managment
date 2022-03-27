@@ -144,7 +144,7 @@ router.put('/edit', checkAuthAndUserSelfOrAdmin, editComment);
  *   post:
  *     summary: React on comment
  *     tags: [Comment]
- *     description: Reaction IDs are like -0, fun - 1, love - 2, angry - 3, sad - 4
+ *     description: Reaction IDs are like - 0, fun - 1, love - 2, angry - 3, sad - 4
  *     parameters:
  *       - in: query
  *         name: commentId
@@ -167,8 +167,6 @@ router.put('/edit', checkAuthAndUserSelfOrAdmin, editComment);
  *         description: Bad request
  *       401:
  *         description: Unauthorized
- *       403:
- *         description: Hidden action
  *       500:
  *         description: Internal server error
 */

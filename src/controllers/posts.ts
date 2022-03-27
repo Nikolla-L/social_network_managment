@@ -3,6 +3,7 @@ import { Post } from '../models/post';
 import { User } from '../models/user';
 import asyncHandler from 'express-async-handler';
 import { getCurrentUserId } from '../utils/getCurrentUserId';
+import { reaction } from '../types/reaction';
 
 export const addPost = asyncHandler(async (req: any, res: Response) => {
     try {
@@ -99,25 +100,36 @@ export const editPost = asyncHandler(async (req: Request, res: Response) => {
     }
 });
 
-export const likePost = asyncHandler(async (req: Request, res: Response) => {
+export const reactOnPost = asyncHandler(async (req: Request, res: Response) => {
     try {
+        const reactionId = req.query.reactionId;
+        const postId = req.query.postId;
         const userId: string = getCurrentUserId(req, res);
-        const postId = req.query.id;
-        if(userId) {
-            const post = await Post.findById(postId);
+        if(![1, 2, 3, 4, 0].includes(Number(reactionId))) {
+            res.status(400).send('invalid reaction id');
+            return;
+        }
+        if(userId && reactionId && userId) {
+            const newReact: reaction = {
+                userId: userId,
+                reactionId: reactionId?.toString()
+            };
+            let post = await Post.findById(postId);
             if(post) {
-                let index = post.likeIds.findIndex(i => i == userId)
-                if(index > -1) {
-                    res.status(201).send('already liked');
-                    return;
+                let postReacts = post.reacts;
+                let reactionIndex = postReacts.findIndex(r => r.userId == userId);
+                if(reactionIndex > -1) {
+                    postReacts[reactionIndex] = newReact;
                 } else {
-                    post.likeIds = [...post.likeIds, userId]
-                    const updatedPost = await post.save();
-                    res.status(201).send(updatedPost);
-                    return;
+                    postReacts.push(newReact);
                 }
+                post.reacts = postReacts;
+                const updatedPost = await post.save();
+                res.status(201).send(updatedPost);
+                return;
             } else {
-                res.status(404).send('Post not found with this Id')
+                res.status(404).send('Post not found with this Id');
+                return;
             }
         } else {
             res.status(400).send('Bad request');
@@ -128,28 +140,25 @@ export const likePost = asyncHandler(async (req: Request, res: Response) => {
     }
 });
 
-export const unlikePost =  asyncHandler(async (req: Request, res: Response) => {
+export const unreactOnPost =  asyncHandler(async (req: Request, res: Response) => {
     try {
         const userId: string = getCurrentUserId(req, res);
         const postId = req.query.postId;
         if(userId) {
-            const post = await Post.findById(postId);
+            let post = await Post.findById(postId);
             if(post) {
-                let index = post.likeIds.findIndex(i => i == userId);
-                if(index > -1) {
-                    let likesArray = post.likeIds;
-                    likesArray.splice(index, 1);
-                    post.likeIds = likesArray;
-
-                    const updatedPost = await post.save();
-                    res.status(201).send(updatedPost);
-                    return;
-                } else {
-                    res.status(201).send('have not liked');
-                    return;
+                let postReacts = post.reacts;
+                let reactionIndex = postReacts.findIndex(r => r.userId == userId);
+                if(reactionIndex > -1) {
+                    postReacts.splice(reactionIndex, 1);
                 }
+                post.reacts = postReacts;
+                const updatedPost = await post.save();
+                res.status(201).send(updatedPost);
+                return;
             } else {
                 res.status(404).send('Post not found with this Id')
+                return;
             }
         } else {
             res.status(400).send('Bad request');

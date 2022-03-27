@@ -5,8 +5,8 @@ import {
     getUserPosts,
     getOnePost,
     editPost,
-    likePost,
-    unlikePost,
+    reactOnPost,
+    unreactOnPost,
     deletePost
 } from '../controllers/posts';
 import { checkAuth } from '../middleware/auth';
@@ -213,17 +213,24 @@ router.put('/edit', checkAuthAndUserSelfOrAdmin, editPost);
 
 /**
  * @swagger
- * /api/posts/like:
- *   put:
- *     summary: Like post
+ * /api/posts/react:
+ *   post:
+ *     summary: React on post
  *     tags: [Post]
+ *     description: Reaction IDs are like - 0, fun - 1, love - 2, angry - 3, sad - 4
  *     parameters:
- *       - in: path
- *         name: id
+ *       - in: query
+ *         name: postId
  *         schema:
  *           type: string
  *           required: true
  *         description: post id
+ *       - in: query
+ *         name: reactionId
+ *         schema:
+ *           type: string
+ *           required: true
+ *         description: reaction id
  *     security: 
  *     - jwt: []
  *     responses:
@@ -236,16 +243,16 @@ router.put('/edit', checkAuthAndUserSelfOrAdmin, editPost);
  *       500:
  *         description: Internal server error
 */
-router.put('/like', checkAuth, likePost);
+router.post('/react', checkAuth, reactOnPost);
 /**
  * @swagger
- * /api/posts/like:
+ * /api/posts/react:
  *   delete:
- *     summary: Unlike post
+ *     summary: Remove reaction on post
  *     tags: [Post]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: postId
  *         schema:
  *           type: string
  *           required: true
@@ -262,7 +269,7 @@ router.put('/like', checkAuth, likePost);
  *       500:
  *         description: Internal server error
 */
-router.delete('/like', checkAuth, unlikePost);
+router.delete('/react', checkAuth, unreactOnPost);
 
 /**
  * @swagger

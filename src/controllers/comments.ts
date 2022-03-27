@@ -77,14 +77,14 @@ export const reactOnComment = asyncHandler(async (req: any, res: Response) => {
     try {
         const reactionId = req.query.reactionId;
         const commentId = req.query.commentId;
-        const userId = getCurrentUserId(req, res);
+        const userId: string = getCurrentUserId(req, res);
         if(![1, 2, 3, 4, 0].includes(Number(reactionId))) {
             res.status(400).send('invalid reaction id');
             return;
         }
         if(commentId && userId && reactionId) {
             const newReact: reaction = {
-                userId: userId?.toString(),
+                userId: userId,
                 reactionId: reactionId?.toString()
             };
             let comment = await Comment.findById(commentId);
@@ -116,7 +116,7 @@ export const reactOnComment = asyncHandler(async (req: any, res: Response) => {
 
 export const unreactOnComment = asyncHandler(async (req: any, res: Response) => {
     try {
-        const userId = getCurrentUserId(req, res);
+        const userId: string = getCurrentUserId(req, res);
         const commentId = req.query.commentId;
         let comment = await Comment.findById(commentId);
         if(comment) {

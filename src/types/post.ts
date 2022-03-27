@@ -1,4 +1,5 @@
 import { Model, Document } from 'mongoose';
+import { reaction } from './reaction';
 
 export interface Post {
     userId: string;
@@ -7,7 +8,7 @@ export interface Post {
     photo: string;
     backgroundColor: string;
     textColor: string;
-    likeIds: Array<string>;
+    reacts: Array<reaction>;
 }
 
 export interface PostDocument extends Post, Document {}

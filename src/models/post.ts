@@ -29,7 +29,7 @@ const postSchema = new Schema(
             required: false,
             default: 'black'
         },
-        likeIds: {
+        reacts: {
             type: Array,
             required: false,
             default: []
