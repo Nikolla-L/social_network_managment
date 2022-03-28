@@ -4,11 +4,11 @@ export const swaggerOptions = {
         info: {
             title: "Social Network Managment System APIs",
             version: "1.0.0",
-            description: "Express Library API"
+            description: "base URL: https://snm-backend.herokuapp.com/"
         },
         servers: [
             {
-                url: "http://localhost:3001"
+                url: "https://snm-backend.herokuapp.com"
             }
         ],
         components: {
